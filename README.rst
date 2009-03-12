@@ -51,8 +51,3 @@ TODO
  * configuration variables
 
 .. _signs: http://www.vim.org/htmldoc/sign.html
-
-Changelog
----------
-
- - 0.1 - First release

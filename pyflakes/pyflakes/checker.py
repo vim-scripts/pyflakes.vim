@@ -4,7 +4,7 @@ import __builtin__
 
 
 allowed_before_future = (ast.Module, ast.ImportFrom, ast.Expr, ast.Str)
-defined_names = set(('__file__',))
+defined_names = set(('__file__', '__builtins__'))
 
 class Binding(object):
     """
@@ -132,9 +132,9 @@ class Checker(ast.NodeVisitor):
     def visit_GeneratorExp(self, node):
         for generator in node.generators:
             self.visit(generator.iter)
-
             self.assign_vars(generator.target)
 
+        for generator in node.generators:
             if hasattr(node, 'elt'):
                 self.visit(node.elt)
 
@@ -159,7 +159,14 @@ class Checker(ast.NodeVisitor):
         self.visit_nodes(node.body + node.orelse)
 
     def visit_FunctionDef(self, node):
-        self.visit_nodes(node.decorators)
+
+        try:
+            decorators = node.decorator_list
+        except AttributeError:
+            # Use .decorators for Python 2.5 compatibility
+            decorators = node.decorators
+
+        self.visit_nodes(decorators)
         self.add_binding(node, FunctionDefinition(node.name, node))
         self.visit_Lambda(node)
 
@@ -177,6 +184,10 @@ class Checker(ast.NodeVisitor):
                 argnames.add(arg.id)
 
             self.assign_vars(node.args.args, report_redef=False)
+            if node.args.vararg is not None:
+                self.add_binding(node, Assignment(node.args.vararg, node), False)
+            if node.args.kwarg is not None:
+                self.add_binding(node, Assignment(node.args.kwarg, node), False)
             self.visit_nodes(node.body)
             self.pop_scope()
 
@@ -303,6 +314,7 @@ class Checker(ast.NodeVisitor):
             self.assign_vars(node.name)
         self.visit_nodes(node.body)
 
+    visit_ExceptHandler = visit_excepthandler # in 2.6, this was CamelCased
 
     def flatten(self, nodes):
         if isinstance(nodes, ast.Attribute):
