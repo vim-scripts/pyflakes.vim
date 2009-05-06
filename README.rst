@@ -10,6 +10,8 @@ unused imports.
 pyflakes-vim uses the output from PyFlakes to highlight the spots in your code
 where 
 
+.. _pyflakes.vim: http://www.vim.org/scripts/script.php?script_id=2441
+
 Quick Installation
 ------------------
 
@@ -51,3 +53,8 @@ TODO
  * configuration variables
 
 .. _signs: http://www.vim.org/htmldoc/sign.html
+
+Changelog
+---------
+
+ - 0.1 - First release
